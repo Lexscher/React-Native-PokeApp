@@ -1,5 +1,13 @@
 import React from "react";
-import { StyleSheet, Text, View, Image, Button } from "react-native";
+import {
+  FlatList,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Button
+} from "react-native";
 import { createStackNavigator, StackNavigator } from "react-navigation";
 
 export default class App extends React.Component {
@@ -9,10 +17,44 @@ export default class App extends React.Component {
 }
 
 class Main extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { isLoading: true };
+  }
+
+  componentDidMount() {
+    return fetch("http://pokeapi.co/api/v2/pokemon/3/")
+      .then(response => response.json())
+      .then(responseJson => {
+        this.setState(
+          {
+            isLoading: false,
+            dataSource: responseJson.pokemon
+          },
+          function() {}
+        );
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
   render() {
+    if (this.state.isLoading) {
+      return (
+        <View style={styles.container}>
+          <ActivityIndicator />
+        </View>
+      );
+    }
+
     return (
-      <View>
-        <Text>This is the next page!</Text>
+      <View style={styles.container}>
+        <FlatList
+          data={this.state.dataSource}
+          renderItem={({ item }) => <Text>{item.name}</Text>}
+          keyExtractor={(item, index) => index}
+        />
       </View>
     );
   }
